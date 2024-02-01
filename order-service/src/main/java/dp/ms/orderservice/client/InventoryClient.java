@@ -13,10 +13,10 @@ import java.util.List;
 @RequiredArgsConstructor
 public class InventoryClient {
 
-    private final WebClient webClient;
+    private final WebClient.Builder webClient;
     public InventoryResponse[] isInStock(List<String> skuCodes){
-        return webClient.get()
-                .uri("http://localhost:8082/api/inventory", uriBuilder -> uriBuilder.queryParam("skuCodes", skuCodes).build())
+        return webClient.build().get()
+                .uri("http://inventory-service/api/inventory", uriBuilder -> uriBuilder.queryParam("skuCodes", skuCodes).build())
                 .retrieve()
                 .bodyToMono(InventoryResponse[].class)
                 .block();
