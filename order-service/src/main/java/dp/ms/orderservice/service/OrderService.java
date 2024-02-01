@@ -1,5 +1,7 @@
 package dp.ms.orderservice.service;
 
+import dp.ms.orderservice.client.InventoryClient;
+import dp.ms.orderservice.dto.InventoryResponse;
 import dp.ms.orderservice.dto.OrderLineItemsDto;
 import dp.ms.orderservice.dto.OrderRequest;
 import dp.ms.orderservice.model.Order;
@@ -9,16 +11,20 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
 @Transactional
 public class OrderService {
 
+    private final InventoryClient inventoryClient;
     private final OrderRepository orderRepository;
     public void placeOrder(OrderRequest orderRequest){
+
         Order order = new Order();
         order.setOrderNumber(UUID.randomUUID().toString());
 
@@ -28,7 +34,20 @@ public class OrderService {
                 .toList();
 
         order.setOrderLineItemsList(orderLineItems);
-        orderRepository.save(order);
+
+        List<String> skuCodes = order.getOrderLineItemsList().stream().map(OrderLineItems::getSkuCode).collect(Collectors.toList());
+
+        // Call Inventory Service, Place order if Item is in Stock
+        InventoryResponse[] inventoryResponses = inventoryClient.isInStock(skuCodes);
+
+        boolean allProductsInStock = Arrays.stream(inventoryResponses).allMatch(InventoryResponse::getIsInStock);
+
+        if (Boolean.TRUE.equals(allProductsInStock)){
+            orderRepository.save(order);
+        }
+        else {
+            throw new IllegalArgumentException("Product not in stock. Please try again later");
+        }
     }
 
     private OrderLineItems mapToDto(OrderLineItemsDto orderLineItemsDto) {
