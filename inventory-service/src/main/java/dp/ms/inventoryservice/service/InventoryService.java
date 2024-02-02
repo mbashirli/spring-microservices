@@ -4,6 +4,7 @@ import dp.ms.inventoryservice.dto.InventoryResponse;
 import dp.ms.inventoryservice.model.Inventory;
 import dp.ms.inventoryservice.repository.InventoryRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
