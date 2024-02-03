@@ -21,6 +21,7 @@
         <module>inventory-service</module>
         <module>discovery-server</module>
         <module>gateway</module>
+        <module>notification-service</module>
     </modules>
 
     <properties>

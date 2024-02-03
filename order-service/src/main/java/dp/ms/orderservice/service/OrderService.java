@@ -4,10 +4,12 @@ import dp.ms.orderservice.client.InventoryClient;
 import dp.ms.orderservice.dto.InventoryResponse;
 import dp.ms.orderservice.dto.OrderLineItemsDto;
 import dp.ms.orderservice.dto.OrderRequest;
+import dp.ms.orderservice.event.OrderPlacedEvent;
 import dp.ms.orderservice.model.Order;
 import dp.ms.orderservice.model.OrderLineItems;
 import dp.ms.orderservice.repository.OrderRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -23,6 +25,8 @@ public class OrderService {
 
     private final InventoryClient inventoryClient;
     private final OrderRepository orderRepository;
+    private final KafkaTemplate<String, Object> kafkaTemplate;
+
     public String placeOrder(OrderRequest orderRequest){
 
         Order order = new Order();
@@ -44,6 +48,7 @@ public class OrderService {
 
         if (Boolean.TRUE.equals(allProductsInStock)){
             orderRepository.save(order);
+            kafkaTemplate.send("notification.topic", new OrderPlacedEvent(order.getOrderNumber()));
             return "Order placed successfully";
         }
         else {
