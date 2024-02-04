@@ -16,21 +16,21 @@ public class BootStrapData implements CommandLineRunner {
 
     @Override
     public void run(String... args) throws Exception {
-        if (inventoryRepository.count() == 0) {
-            Inventory item1 = Inventory.builder()
-                    .skuCode("iPhone")
-                    .quantity(100)
-                    .build();
-            Inventory item2 = Inventory.builder()
-                    .skuCode("MacBook")
-                    .quantity(50)
-                    .build();
-            Inventory item3 = Inventory.builder()
-                    .skuCode("iPad")
-                    .quantity(70)
-                    .build();
-
-            inventoryRepository.saveAll(Arrays.asList(item1, item2, item3));
-        }
+//        if (inventoryRepository.count() == 0) {
+//            Inventory item1 = Inventory.builder()
+//                    .skuCode("iPhone")
+//                    .quantity(100)
+//                    .build();
+//            Inventory item2 = Inventory.builder()
+//                    .skuCode("MacBook")
+//                    .quantity(50)
+//                    .build();
+//            Inventory item3 = Inventory.builder()
+//                    .skuCode("iPad")
+//                    .quantity(70)
+//                    .build();
+//
+//            inventoryRepository.saveAll(Arrays.asList(item1, item2, item3));
+//        }
     }
 }

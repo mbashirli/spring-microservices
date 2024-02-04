@@ -9,15 +9,18 @@ import dp.ms.orderservice.model.Order;
 import dp.ms.orderservice.model.OrderLineItems;
 import dp.ms.orderservice.repository.OrderRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.net.URL;
 import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 @Transactional
@@ -28,7 +31,6 @@ public class OrderService {
     private final KafkaTemplate<String, Object> kafkaTemplate;
 
     public String placeOrder(OrderRequest orderRequest){
-
         Order order = new Order();
         order.setOrderNumber(UUID.randomUUID().toString());
 
@@ -48,7 +50,13 @@ public class OrderService {
 
         if (Boolean.TRUE.equals(allProductsInStock)){
             orderRepository.save(order);
-            kafkaTemplate.send("notification.topic", new OrderPlacedEvent(order.getOrderNumber()));
+            try {
+                kafkaTemplate.send("notification.topic", new OrderPlacedEvent(order.getOrderNumber()));
+                log.info("Message sent successfully");
+            } catch (Exception e) {
+                log.error("Failed to send message", e);
+            }
+
             return "Order placed successfully";
         }
         else {
