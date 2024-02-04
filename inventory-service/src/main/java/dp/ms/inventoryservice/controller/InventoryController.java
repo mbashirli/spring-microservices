@@ -1,5 +1,6 @@
 package dp.ms.inventoryservice.controller;
 
+import dp.ms.inventoryservice.dto.InventoryDTO;
 import dp.ms.inventoryservice.dto.InventoryResponse;
 import dp.ms.inventoryservice.service.InventoryService;
 import lombok.RequiredArgsConstructor;
@@ -27,5 +28,12 @@ public class InventoryController {
     public List<InventoryResponse> isInStock(@RequestParam List<String> skuCodes){
         log.info("Received request for isInStock method");
         return inventoryService.isInStock(skuCodes);
+    }
+
+    @GetMapping("/listInventory")
+    @ResponseStatus(HttpStatus.OK)
+    public List<InventoryDTO> listInventory(){
+        log.info("Received request for listInventory method");
+        return inventoryService.listInventory();
     }
 }

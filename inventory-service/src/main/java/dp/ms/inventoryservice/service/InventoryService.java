@@ -1,5 +1,6 @@
 package dp.ms.inventoryservice.service;
 
+import dp.ms.inventoryservice.dto.InventoryDTO;
 import dp.ms.inventoryservice.dto.InventoryResponse;
 import dp.ms.inventoryservice.model.Inventory;
 import dp.ms.inventoryservice.repository.InventoryRepository;
@@ -30,4 +31,13 @@ public class InventoryService {
                 .toList();
     }
 
+    public List<InventoryDTO> listInventory() {
+        return inventoryRepository.findAll()
+                .stream()
+                .map(inventory -> InventoryDTO.builder()
+                        .id(inventory.getId())
+                        .skuCode(inventory.getSkuCode())
+                        .quantity(inventory.getQuantity())
+                        .build()).toList();
+    }
 }
