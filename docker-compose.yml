@@ -11,7 +11,7 @@ services:
     ports:
       - '3306:3306'
     volumes:
-      - ./mysql-order:/var/lib/mysql
+      - ./db_volumes/mysql-order:/var/lib/mysql
   mysql-inventory:
     image: mysql:8.3
     container_name: mysql-inventory
@@ -22,7 +22,19 @@ services:
     ports:
       - '3307:3306'
     volumes:
-      - ./mysql-inventory:/var/lib/mysql
+      - ./db_volumes/mysql-inventory:/var/lib/mysql
+  mongo-product:
+    image: mongo:latest
+    container_name: mongo-product
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: admin
+      MONGO_INITDB_ROOT_PASSWORD: password
+    ports:
+      - '27017:27017'
+    volumes:
+      - ./db_volumes/mongodb_data_container:/data/db
+      - ./db_volumes/mongodb_config_container:/data/configdb
+
   discovery-server:
     build: ./discovery-server
     container_name: discovery-server
@@ -39,7 +51,6 @@ services:
       - SPRING_PROFILES_ACTIVE=docker
     depends_on:
       - discovery-server
-
   order-service:
     build: ./order-service
     container_name: order-service
@@ -50,7 +61,6 @@ services:
       - broker
       - mysql-order
       - discovery-server
-
   inventory-service:
     build: ./inventory-service
     container_name: inventory-service
@@ -59,15 +69,20 @@ services:
     depends_on:
       - mysql-inventory
       - discovery-server
-      - api-gateway
-
   notification-service:
     build: ./notification-service
     container_name: notification-service
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
     depends_on:
       - broker
       - zookeeper
-
+  product-service:
+    build: ./product-service
+    container_name: product-service
+    depends_on:
+      - discovery-server
+      - mongo-product
   zookeeper:
     image: confluentinc/cp-zookeeper:latest
     container_name: zookeeper
@@ -92,3 +107,32 @@ services:
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
       KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
       KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
+
+  ## Prometheus
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: prometheus
+    restart: always
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+    depends_on:
+      - product-service
+      - inventory-service
+      - order-service
+      - notification-service
+
+  grafana:
+    image: grafana/grafana-oss:latest
+    container_name: grafana
+    restart: always
+    ports:
+      - "3000:3000"
+    links:
+      - prometheus:prometheus
+    volumes:
+      - ./grafana:/var/lib/grafana
+    environment:
+      - GF_SECURITY_ADMIN_USER=admin
+      - GF_SECURITY_ADMIN_PASSWORD=password
