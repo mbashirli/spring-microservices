@@ -1,6 +1,7 @@
 package dp.ms.productservice.service;
 
 import dp.ms.productservice.dto.ProductRequest;
+import dp.ms.productservice.exception.ProductCreationException;
 import dp.ms.productservice.mappers.ProductMapper;
 import dp.ms.productservice.model.Product;
 import dp.ms.productservice.repositories.ProductRepository;
@@ -12,6 +13,7 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import static org.junit.Assert.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.verify;
@@ -31,23 +33,17 @@ class ProductServiceTest {
     ProductMapper productMapper;
 
     @Test
-    void createProduct() {
-        ProductRequest productRequest = ProductRequest.builder()
-                .name("Product")
-                .description("Desc")
-                .price(BigDecimal.valueOf(123))
-                .build();
+    void createProductCreationException() {
+        // Set up the mock behavior
+        given(productRepository.save(any(Product.class))).willThrow(new RuntimeException("Database error"));
 
-        Product product = Product.builder()
-                .id("22")
-                .build();
-
-        given(productRepository.save(any(Product.class))).willReturn(product);
-        productService.createProduct(productRequest);
-        verify(productRepository).save(any(Product.class));
+        // Now, test that the exception is thrown
+        assertThrows(ProductCreationException.class, () -> {
+            productService.createProduct(getProduct());
+        });
     }
 
-    @Test
-    void getAllProducts() {
+    private ProductRequest getProduct() {
+        return new ProductRequest("Sample Name", "Sample Description", new BigDecimal("99.99"));
     }
 }
