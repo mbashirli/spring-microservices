@@ -26,4 +26,22 @@ public class InventoryRepository {
     public Integer getQuantity(String inventoryId) {
         return redisTemplate.opsForValue().get(inventoryId);
     }
+
+    public void incrementInventory(String inventoryId, Integer quantity) {
+        if (inventoryId != null && quantity != null) {
+            redisTemplate.opsForValue().increment(inventoryId, quantity);
+        } else {
+            // Handle null key or amount appropriately (throw exception, log warning, etc.)
+            throw new IllegalArgumentException("Inventory ID and amount must not be null");
+        }
+    }
+
+    public void decrementInventory(String inventoryId, Integer quantity) {
+        if (inventoryId != null && quantity != null) {
+            redisTemplate.opsForValue().decrement(inventoryId, quantity);
+        } else {
+            // Handle null key or amount appropriately (throw exception, log warning, etc.)
+            throw new IllegalArgumentException("Inventory ID and amount must not be null");
+        }
+    }
 }
