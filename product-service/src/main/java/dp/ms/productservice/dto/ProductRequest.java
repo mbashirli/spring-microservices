@@ -19,11 +19,15 @@ public class ProductRequest {
 
     @Schema(description = "Name")
     @NotBlank(message = "name may not be blank")
-    private String name;
+    private String productName;
 
     @Schema(description = "Description")
     @NotBlank(message = "description may not be blank")
     private String description;
+
+    @Schema(description = "Category")
+    @NotBlank(message = "Category may not be blank")
+    private String category;
 
     @Schema(description = "Price")
     @NotNull(message = "price may not be blank")

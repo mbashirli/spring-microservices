@@ -1,14 +1,11 @@
 package dp.ms.productservice.controller;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import dp.ms.productservice.dto.ProductRequest;
 import dp.ms.productservice.service.ProductService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
@@ -43,9 +40,10 @@ public class ProductControllerTest {
     @Test
     public void createProductSuccess() throws Exception{
         ProductRequest productRequest = ProductRequest.builder()
-                .name("iPhone")
+                .productName("iPhone")
                 .price(BigDecimal.TEN)
                 .description("Description")
+                .category("category")
                 .build();
 
         mockMvc.perform(post("/api/product")

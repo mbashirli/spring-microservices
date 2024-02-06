@@ -44,6 +44,6 @@ class ProductServiceTest {
     }
 
     private ProductRequest getProduct() {
-        return new ProductRequest("Sample Name", "Sample Description", new BigDecimal("99.99"));
+        return new ProductRequest("Sample Name", "Sample Description", "Sample category", new BigDecimal("99.99"));
     }
 }
