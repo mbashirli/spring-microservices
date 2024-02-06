@@ -7,7 +7,6 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
-import java.util.UUID;
 
 @Data
 @AllArgsConstructor
@@ -20,10 +19,13 @@ public class ProductDTO {
     private String id;
 
     @Schema(description = "Name")
-    private String name;
+    private String productName;
 
     @Schema(description = "Description")
     private String description;
+
+    @Schema(description = "Category")
+    private String category;
 
     @Schema(description = "Price")
     private BigDecimal price;

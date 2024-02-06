@@ -23,9 +23,10 @@ public class ProductService {
     public ProductDTO createProduct(ProductRequest productRequest) {
         try {
             Product product = Product.builder()
-                    .name(productRequest.getName())
+                    .productName(productRequest.getProductName())
                     .description(productRequest.getDescription())
                     .price(productRequest.getPrice())
+                    .category(productRequest.getCategory())
                     .build();
             Product savedProduct = productRepository.save(product);
             log.info("Product with id - {} is saved.", savedProduct.getId());
@@ -44,6 +45,7 @@ public class ProductService {
     }
 
     public void deleteProduct(String productId) {
+        log.info("Delete product method called");
         if (!productRepository.existsById(productId)) {
             throw new ProductNotFoundException(productId.toString());
         }
@@ -51,11 +53,13 @@ public class ProductService {
     }
 
     public ProductDTO updateProduct(String productId, ProductDTO productDTO) {
+        log.info("Update product method called");
         AtomicReference<Product> atomicReference = new AtomicReference<>();
         productRepository.findById(productId).ifPresentOrElse(product -> {
             product.setDescription(productDTO.getDescription());
-            product.setName(productDTO.getName());
+            product.setProductName(productDTO.getProductName());
             product.setPrice(productDTO.getPrice());
+            product.setCategory(productDTO.getCategory());
             productRepository.save(product);
             atomicReference.set(product);
         }, () -> {throw new ProductNotFoundException(productId);});
@@ -64,22 +68,28 @@ public class ProductService {
     }
 
     public ProductDTO getProductById(String productId) {
+        log.info("Get product by id method called");
         return productRepository.findById(productId).map(productMapper::productToProductDTO)
                 .orElseThrow(() -> new ProductNotFoundException(productId));
     }
 
     public ProductDTO patchProduct(String productId, ProductDTO productDTO) {
+        log.info("Patch product method called");
         Product product = productRepository.findById(productId)
                 .orElseThrow(() -> new ProductNotFoundException(productId));
 
-        if (productDTO.getName() != null && !productDTO.getName().isBlank()) {
-            product.setName(productDTO.getName());
+        if (productDTO.getProductName() != null && !productDTO.getProductName().isBlank()) {
+            product.setProductName(productDTO.getProductName());
         }
         if (productDTO.getPrice() != null) {
             product.setPrice(productDTO.getPrice());
         }
         if (productDTO.getDescription() != null && !productDTO.getDescription().isBlank()) {
             product.setDescription(productDTO.getDescription());
+        }
+
+        if (productDTO.getCategory() != null && !productDTO.getCategory().isBlank()) {
+            product.setCategory(productDTO.getCategory());
         }
 
         product = productRepository.save(product);
