@@ -26,4 +26,12 @@ public class InventoryService {
     public Integer getQuantity(String inventoryId) {
         return inventoryRepository.getQuantity(inventoryId);
     }
+
+    public void incrementInventory(String inventoryId, Integer quantity) {
+        inventoryRepository.incrementInventory(inventoryId, quantity);
+    }
+
+    public void decrementInventory(String inventoryId, Integer quantity) {
+        inventoryRepository.decrementInventory(inventoryId, quantity);
+    }
 }

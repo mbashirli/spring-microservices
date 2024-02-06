@@ -4,6 +4,8 @@ import dp.ms.inventoryservice.dto.InventoryDTO;
 import dp.ms.inventoryservice.mapper.InventoryMapper;
 import dp.ms.inventoryservice.repository.InventoryRepository;
 import dp.ms.inventoryservice.service.InventoryService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -15,17 +17,21 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @Slf4j
 @RequestMapping("/api/inventory")
 @RequiredArgsConstructor
+@Tag(name = "Internal api", description = "Inventory service internal controller")
 public class InventoryController {
 
     private final InventoryService inventoryService;
 
     @GetMapping("/{inventoryId}")
+    @ResponseStatus(HttpStatus.OK)
+    @Operation(summary = "Get inventory", description = "Get inventory for a specific inventoryId.")
     public ResponseEntity<Integer> getInventory(@PathVariable("inventoryId") String inventoryId){
         Integer quantity = inventoryService.getQuantity(inventoryId);
         if (quantity != null) {
@@ -36,14 +42,35 @@ public class InventoryController {
     }
 
     @PostMapping
+    @ResponseStatus(HttpStatus.CREATED)
+    @Operation(summary = "Add inventory", description = "Add inventory using an InventoryDTO object.")
     public ResponseEntity<Void> addInventory(@RequestBody InventoryDTO inventoryDTO) {
         inventoryService.addInventory(inventoryDTO);
         return ResponseEntity.status(HttpStatus.CREATED).build();
     }
-    @PatchMapping("/{inventoryId}")
+    @PatchMapping("/{inventoryId}/set")
+    @ResponseStatus(HttpStatus.OK)
+    @Operation(summary = "Set inventory", description = "Set inventory for a specific inventoryId")
     public ResponseEntity<Void> setInventory(@PathVariable("inventoryId") String inventoryId, @RequestParam Integer quantity) {
         inventoryService.setInventory(inventoryId, quantity);
         return ResponseEntity.status(HttpStatus.OK).build();
     }
+
+    @PatchMapping("/{inventoryId}/increment")
+    @ResponseStatus(HttpStatus.OK)
+    @Operation(summary = "Increment inventory", description = "Increment inventory by a specific quantity.")
+    public ResponseEntity<Void> incrementItemQuantity(@PathVariable("inventoryId") String inventoryId, @RequestParam Integer quantity) {
+        inventoryService.incrementInventory(inventoryId, quantity);
+        return ResponseEntity.status(HttpStatus.OK).build();
+    }
+
+    @PatchMapping("/{inventoryId}/decrement")
+    @ResponseStatus(HttpStatus.OK)
+    @Operation(summary = "Decrement inventory", description = "Decrement inventory by a specific quantity.")
+    public ResponseEntity<Void> decrementItemQuantity(@PathVariable("inventoryId") String inventoryId, @RequestParam Integer quantity) {
+        inventoryService.decrementInventory(inventoryId, quantity);
+        return ResponseEntity.status(HttpStatus.OK).build();
+    }
+
 
 }
