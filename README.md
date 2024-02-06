@@ -14,6 +14,7 @@ Spring Microservices Project.
 **Database**
 * MySQL
 * MongoDB
+* Redis
 
 **Inter-process Communication**
 * Netflix Eureka Discovery Server
