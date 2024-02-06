@@ -12,7 +12,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.UUID;
+import java.util.concurrent.atomic.AtomicReference;
 
 @Service
 @RequiredArgsConstructor
@@ -43,10 +43,46 @@ public class ProductService {
                 .toList();
     }
 
-    public void deleteProduct(UUID productId) {
+    public void deleteProduct(String productId) {
         if (!productRepository.existsById(productId)) {
             throw new ProductNotFoundException(productId.toString());
         }
         productRepository.deleteById(productId);
+    }
+
+    public ProductDTO updateProduct(String productId, ProductDTO productDTO) {
+        AtomicReference<Product> atomicReference = new AtomicReference<>();
+        productRepository.findById(productId).ifPresentOrElse(product -> {
+            product.setDescription(productDTO.getDescription());
+            product.setName(productDTO.getName());
+            product.setPrice(productDTO.getPrice());
+            productRepository.save(product);
+            atomicReference.set(product);
+        }, () -> {throw new ProductNotFoundException(productId);});
+
+        return productMapper.productToProductDTO(atomicReference.get());
+    }
+
+    public ProductDTO getProductById(String productId) {
+        return productRepository.findById(productId).map(productMapper::productToProductDTO)
+                .orElseThrow(() -> new ProductNotFoundException(productId));
+    }
+
+    public ProductDTO patchProduct(String productId, ProductDTO productDTO) {
+        Product product = productRepository.findById(productId)
+                .orElseThrow(() -> new ProductNotFoundException(productId));
+
+        if (productDTO.getName() != null && !productDTO.getName().isBlank()) {
+            product.setName(productDTO.getName());
+        }
+        if (productDTO.getPrice() != null) {
+            product.setPrice(productDTO.getPrice());
+        }
+        if (productDTO.getDescription() != null && !productDTO.getDescription().isBlank()) {
+            product.setDescription(productDTO.getDescription());
+        }
+
+        product = productRepository.save(product);
+        return productMapper.productToProductDTO(product);
     }
 }
