@@ -1,5 +1,6 @@
 package dp.ms.productservice.service;
 
+import dp.ms.productservice.client.InventoryClient;
 import dp.ms.productservice.dto.ProductDTO;
 import dp.ms.productservice.dto.ProductRequest;
 import dp.ms.productservice.exception.ProductCreationException;
@@ -18,17 +19,14 @@ import java.util.concurrent.atomic.AtomicReference;
 @RequiredArgsConstructor
 @Slf4j
 public class ProductService {
-    private final ProductRepository productRepository;
     private final ProductMapper productMapper;
-    public ProductDTO createProduct(ProductRequest productRequest) {
+    private final InventoryClient inventoryClient;
+    private final ProductRepository productRepository;
+    public ProductDTO createProduct(ProductRequest productRequest, Integer stockQuantity) {
         try {
-            Product product = Product.builder()
-                    .productName(productRequest.getProductName())
-                    .description(productRequest.getDescription())
-                    .price(productRequest.getPrice())
-                    .category(productRequest.getCategory())
-                    .build();
+            Product product = productMapper.productRequestToProduct(productRequest);
             Product savedProduct = productRepository.save(product);
+            inventoryClient.setInventoryStock(product.getId(), stockQuantity);
             log.info("Product with id - {} is saved.", savedProduct.getId());
             return productMapper.productToProductDTO(savedProduct);
         } catch (Exception ex){
