@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -57,8 +58,9 @@ public class ProductController {
     @PostMapping()
     @ResponseStatus(HttpStatus.CREATED)
     @Operation(summary = "Create a new product.", description = "Creates a new product using the sent request body.")
-    public ResponseEntity<ProductDTO> createProduct(@Validated @RequestBody ProductRequest productRequest) {
-        ProductDTO savedDto = productService.createProduct(productRequest);
+    public ResponseEntity<ProductDTO> createProduct(@Validated @RequestBody ProductRequest productRequest,
+                                                    @RequestParam Integer stockQuantity) {
+        ProductDTO savedDto = productService.createProduct(productRequest, stockQuantity);
         return ResponseEntity.status(HttpStatus.CREATED).body(savedDto);
     }
 

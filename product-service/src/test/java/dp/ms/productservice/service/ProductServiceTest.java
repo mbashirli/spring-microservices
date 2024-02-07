@@ -5,12 +5,10 @@ import dp.ms.productservice.exception.ProductCreationException;
 import dp.ms.productservice.mappers.ProductMapper;
 import dp.ms.productservice.model.Product;
 import dp.ms.productservice.repositories.ProductRepository;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import static org.junit.Assert.assertThrows;
@@ -36,10 +34,11 @@ class ProductServiceTest {
     void createProductCreationException() {
         // Set up the mock behavior
         given(productRepository.save(any(Product.class))).willThrow(new RuntimeException("Database error"));
+        Integer stockQuantity = 0;
 
         // Now, test that the exception is thrown
         assertThrows(ProductCreationException.class, () -> {
-            productService.createProduct(getProduct());
+            productService.createProduct(getProduct(), stockQuantity);
         });
     }
 
