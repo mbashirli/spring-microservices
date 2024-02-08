@@ -76,7 +76,8 @@ public class OrderService {
             order.setShippingAddress(orderDTO.getShippingAddress());
 
             Order placedOrder = orderRepository.save(order);
-            OrderPlacedEvent orderPlacedEvent = orderMapper.orderToOrderPlacedEvent(placedOrder);
+            orderRepository.flush();
+            OrderPlacedEvent orderPlacedEvent = orderMapper.orderToOrderPlacedEvent(orderRepository.findById(placedOrder.getId()).get());
             log.info("Created orderplacedevent");
 
             try {
