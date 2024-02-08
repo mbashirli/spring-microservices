@@ -1,23 +1,30 @@
 package dp.ms.orderservice.service;
 
 import dp.ms.orderservice.client.InventoryClient;
-import dp.ms.orderservice.dto.InventoryResponse;
-import dp.ms.orderservice.dto.OrderLineItemsDto;
-import dp.ms.orderservice.dto.OrderRequest;
+import dp.ms.orderservice.client.ProductClient;
+import dp.ms.orderservice.dto.OrderDTO;
+import dp.ms.orderservice.dto.OrderLineItemDTO;
 import dp.ms.orderservice.event.OrderPlacedEvent;
+import dp.ms.orderservice.exception.OrderCreationException;
+import dp.ms.orderservice.exception.OrderNotFoundException;
+import dp.ms.orderservice.mapper.OrderMapper;
 import dp.ms.orderservice.model.Order;
-import dp.ms.orderservice.model.OrderLineItems;
+import dp.ms.orderservice.model.OrderLineItem;
+import dp.ms.orderservice.model.enums.OrderStatus;
 import dp.ms.orderservice.repository.OrderRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import reactor.core.publisher.Mono;
 
-import java.net.URL;
-import java.util.Arrays;
+import java.math.BigDecimal;
 import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -26,49 +33,80 @@ import java.util.stream.Collectors;
 @Transactional
 public class OrderService {
 
+    private final OrderMapper orderMapper;
+    private final ProductClient productClient;
     private final InventoryClient inventoryClient;
     private final OrderRepository orderRepository;
     private final KafkaTemplate<String, Object> kafkaTemplate;
 
-    public String placeOrder(OrderRequest orderRequest){
-        Order order = new Order();
-        order.setOrderNumber(UUID.randomUUID().toString());
+    @Transactional
+    public OrderPlacedEvent placeOrder(OrderDTO orderDTO) {
+        Boolean allProductsInStock = checkProductsInStock(orderDTO.getOrderLineItemsDTO());
+        if (!allProductsInStock) {
+            // If not all products are in stock, throw an exception
+            throw new OrderCreationException("Order creation failed: One or more products are not in stock.");
+        }
 
-        List<OrderLineItems> orderLineItems = orderRequest.getOrderLineItemsDtoList()
-                .stream()
-                .map(this::mapToDto)
-                .toList();
+        log.info("All products in stock");
 
-        order.setOrderLineItemsList(orderLineItems);
+        try {
+            Order order = new Order();
+            List<OrderLineItem> orderLineItems = orderDTO.getOrderLineItemsDTO()
+                    .stream()
+                    .map(orderLineItemDTO -> OrderLineItem.builder()
+                            .order(order)
+                            .productId(orderLineItemDTO.getProductId())
+                            .quantity(orderLineItemDTO.getQuantity())
+                            .build())
+                    .toList();
 
-        List<String> skuCodes = order.getOrderLineItemsList().stream().map(OrderLineItems::getSkuCode).collect(Collectors.toList());
+            AtomicReference<BigDecimal> totalPrice = new AtomicReference<>(BigDecimal.ZERO);
+            orderLineItems.forEach(orderLineItem -> {
+                BigDecimal price = productClient.getProductPrice(orderLineItem.getProductId()).multiply(BigDecimal.valueOf(orderLineItem.getQuantity()));
+                orderLineItem.setPrice(price);
+                totalPrice.updateAndGet(v -> v.add(price));
+            });
 
-        // Call Inventory Service, Place order if Item is in Stock
-        InventoryResponse[] inventoryResponses = inventoryClient.isInStock(skuCodes);
+            order.setTotalPrice(totalPrice.get());
+            order.setOrderLineItems(orderLineItems);
+            order.setOrderStatus(OrderStatus.PENDING);
+            order.setOrderNote(orderDTO.getOrderNote());
+            order.setCustomerId(orderDTO.getCustomerId());
+            order.setTransactionId(UUID.randomUUID().toString());
+            order.setShippingAddress(orderDTO.getShippingAddress());
 
-        boolean allProductsInStock = Arrays.stream(inventoryResponses).allMatch(InventoryResponse::getIsInStock);
+            Order placedOrder = orderRepository.save(order);
+            OrderPlacedEvent orderPlacedEvent = orderMapper.orderToOrderPlacedEvent(placedOrder);
+            log.info("Created orderplacedevent");
 
-        if (Boolean.TRUE.equals(allProductsInStock)){
-            orderRepository.save(order);
             try {
-                kafkaTemplate.send("notification.topic", new OrderPlacedEvent(order.getOrderNumber()));
+                kafkaTemplate.send("notification.topic", orderPlacedEvent);
                 log.info("Message sent successfully");
             } catch (Exception e) {
                 log.error("Failed to send message", e);
             }
 
-            return "Order placed successfully";
-        }
-        else {
-            throw new IllegalArgumentException("Product not in stock. Please try again later");
+            return orderPlacedEvent;
+        } catch (Exception ex) {
+            throw new OrderCreationException("Order creation failed: " + ex);
         }
     }
 
-    private OrderLineItems mapToDto(OrderLineItemsDto orderLineItemsDto) {
-        return OrderLineItems.builder()
-                .price(orderLineItemsDto.getPrice())
-                .skuCode(orderLineItemsDto.getSkuCode())
-                .quantity(orderLineItemsDto.getQuantity())
-                .build();
+    private Boolean checkProductsInStock(List<OrderLineItemDTO> orderLineItemsDTO) {
+        Map<String, Integer> productsWithQuantity = orderLineItemsDTO.stream()
+                .collect(Collectors.toMap(
+                        OrderLineItemDTO::getProductId, // Key Mapper
+                        OrderLineItemDTO::getQuantity // Value Mapper
+                ));
+
+        return inventoryClient.isInStock(productsWithQuantity);
+    }
+
+    public OrderDTO getOrderInformation(UUID orderId) {
+        Optional<Order> order = orderRepository.findById(orderId);
+        if (order.isPresent()){
+            return orderMapper.orderToOrderDTO(order.get());
+        }
+        throw new OrderNotFoundException("Order not found. Order id: " + orderId.toString());
     }
 }

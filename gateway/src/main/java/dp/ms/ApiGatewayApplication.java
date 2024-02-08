@@ -30,6 +30,8 @@ public class ApiGatewayApplication
                         .filters(f -> f.rewritePath("/eureka/web/(?<segment>.*)", "/${segment}")
                                 .stripPrefix(2))
                         .uri("http://localhost:8761"))
+                .route("inventory-service", r -> r.path("/api/inventory/**")
+                        .uri("lb://inventory-service"))
                 .build();
     }
 }

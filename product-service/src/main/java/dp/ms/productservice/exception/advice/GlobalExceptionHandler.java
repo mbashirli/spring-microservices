@@ -1,5 +1,6 @@
 package dp.ms.productservice.exception.advice;
 
+import dp.ms.productservice.exception.FieldAccessException;
 import dp.ms.productservice.exception.ProductCreationException;
 import dp.ms.productservice.exception.ProductNotFoundException;
 import org.springframework.http.HttpStatus;
@@ -18,6 +19,15 @@ import java.util.stream.Collectors;
 
 @ControllerAdvice
 public class GlobalExceptionHandler {
+
+    @ExceptionHandler(FieldAccessException.class)
+    public ResponseEntity<?> handleFieldAccessException(FieldAccessException ex) {
+        Map<String, Object> response = new HashMap<>();
+        response.put("error", ex.getMessage());
+        response.put("status", HttpStatus.BAD_REQUEST.value());
+
+        return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+    }
 
     @ExceptionHandler(ProductCreationException.class)
     public ResponseEntity<?> handleProductCreationException(ProductCreationException ex) {
