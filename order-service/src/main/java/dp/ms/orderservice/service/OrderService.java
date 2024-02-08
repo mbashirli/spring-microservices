@@ -77,7 +77,10 @@ public class OrderService {
 
             Order placedOrder = orderRepository.save(order);
             orderRepository.flush();
-            OrderPlacedEvent orderPlacedEvent = orderMapper.orderToOrderPlacedEvent(orderRepository.findById(placedOrder.getId()).get());
+
+            OrderPlacedEvent orderPlacedEvent = orderMapper.orderToOrderPlacedEvent(
+                    orderRepository.findById(placedOrder.getId()).get()
+            );
             log.info("Created orderplacedevent");
 
             try {

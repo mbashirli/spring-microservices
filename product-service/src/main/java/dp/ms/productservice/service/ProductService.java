@@ -122,6 +122,9 @@ public class ProductService {
                 }
             });
         }
+        else {
+            throw new ProductNotFoundException("Product not found");
+        }
 
         return productMap;
     }
