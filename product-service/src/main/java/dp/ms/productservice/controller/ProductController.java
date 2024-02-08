@@ -1,6 +1,6 @@
 package dp.ms.productservice.controller;
 
-import dp.ms.productservice.dto.ProductRequest;
+import dp.ms.productservice.dto.CreateProductRequest;
 import dp.ms.productservice.dto.ProductDTO;
 import dp.ms.productservice.service.ProductService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -19,11 +19,10 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
-import java.util.UUID;
+import java.util.Map;
 
 @Slf4j
 @RestController
@@ -35,10 +34,8 @@ public class ProductController {
     private final ProductService productService;
 
     @GetMapping()
-    @ResponseStatus(HttpStatus.OK)
-    @Operation(summary = "Get all products", description = "Returns a list of all products in the system.")
+    @Operation(description = "Returns a list of all products in the system.")
     public ResponseEntity<List<ProductDTO>> getAllProduct(){
-        log.info("Request received for get all products");
         List<ProductDTO> products = productService.getAllProducts();
         if (products.isEmpty()) {
             return ResponseEntity.noContent().build(); // Return 204 No Content if the list is empty
@@ -48,25 +45,29 @@ public class ProductController {
     }
 
     @GetMapping("/{productId}")
-    @ResponseStatus(HttpStatus.OK)
-    @Operation(summary = "Get product by id", description = "Returns the product with the given id.")
+    @Operation(description = "Returns the product with the given id.")
     public ResponseEntity<ProductDTO> getProductById(@PathVariable("productId") String productId){
         ProductDTO foundProduct = productService.getProductById(productId);
         return ResponseEntity.status(HttpStatus.OK).body(foundProduct);
     }
 
+    @GetMapping("/{productId}/select-fields")
+    @Operation(description = "Returns the product with the given id.")
+    public ResponseEntity<Map<String, Object>> getProductFieldsById(@PathVariable("productId") String productId, @RequestParam String fields){
+        Map<String, Object> foundProductFields = productService.getProductFieldsById(productId, fields);
+        return ResponseEntity.status(HttpStatus.OK).body(foundProductFields);
+    }
+
     @PostMapping()
-    @ResponseStatus(HttpStatus.CREATED)
-    @Operation(summary = "Create a new product.", description = "Creates a new product using the sent request body.")
-    public ResponseEntity<ProductDTO> createProduct(@Validated @RequestBody ProductRequest productRequest,
+    @Operation(description = "Creates a new product using the sent request body.")
+    public ResponseEntity<ProductDTO> createProduct(@Validated @RequestBody CreateProductRequest createProductRequest,
                                                     @RequestParam Integer stockQuantity) {
-        ProductDTO savedDto = productService.createProduct(productRequest, stockQuantity);
+        ProductDTO savedDto = productService.createProduct(createProductRequest, stockQuantity);
         return ResponseEntity.status(HttpStatus.CREATED).body(savedDto);
     }
 
     @DeleteMapping("/{productId}")
-    @ResponseStatus(HttpStatus.OK)
-    @Operation(summary = "Delete a product by id", description = "Deletes a product with the given id.")
+    @Operation(description = "Deletes a product with the given id.")
     public ResponseEntity<String> deleteProduct(@PathVariable("productId") String productId){
         productService.deleteProduct(productId);
         String message = "Product with id " + productId + " has been deleted.";
@@ -75,16 +76,14 @@ public class ProductController {
     }
 
     @PutMapping("/{productId}")
-    @ResponseStatus(HttpStatus.OK)
-    @Operation(summary = "Fully update product", description = "Completely updates a product with the given request body.")
+    @Operation(description = "Completely updates a product with the given request body.")
     public ResponseEntity<ProductDTO> updateProduct(@PathVariable("productId") String productId, @Validated @RequestBody  ProductDTO productDTO){
         ProductDTO updatedDTO = productService.updateProduct(productId, productDTO);
         return ResponseEntity.status(HttpStatus.OK).body(updatedDTO);
     }
 
     @PatchMapping("/{productId}")
-    @ResponseStatus(HttpStatus.OK)
-    @Operation(summary = "Patch product", description = "Patch the product with the given request body.")
+    @Operation(description = "Patch the product with the given request body.")
     public ResponseEntity<ProductDTO> patchProduct(@PathVariable("productId") String productId, @RequestBody  ProductDTO productDTO){
         ProductDTO patchedDTO = productService.patchProduct(productId, productDTO);
         return ResponseEntity.status(HttpStatus.OK).body(patchedDTO);
