@@ -23,7 +23,7 @@ public class NotificationHandler {
 
     @KafkaHandler
     public void listen(OrderPlacedEvent orderPlacedEvent){
-       log.info("Received order number: {}", orderPlacedEvent.getOrderNumber());
+       log.info("Received order number: {}", orderPlacedEvent.getId());
 
        // todo: send email through NotificationService
     }

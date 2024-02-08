@@ -15,7 +15,7 @@ import java.math.BigDecimal;
 @NoArgsConstructor
 @Builder
 @Schema(description = "DTO for ProductRequest")
-public class ProductRequest {
+public class CreateProductRequest {
 
     @Schema(description = "Name")
     @NotBlank(message = "name may not be blank")
