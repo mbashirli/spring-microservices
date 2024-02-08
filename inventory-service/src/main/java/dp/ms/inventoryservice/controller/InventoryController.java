@@ -60,6 +60,4 @@ public class InventoryController {
         inventoryService.decrementInventory(inventoryId, quantity);
         return ResponseEntity.status(HttpStatus.OK).build();
     }
-
-
 }

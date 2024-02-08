@@ -1,7 +1,7 @@
 package dp.ms.productservice.mappers;
 
 import dp.ms.productservice.dto.ProductDTO;
-import dp.ms.productservice.dto.ProductRequest;
+import dp.ms.productservice.dto.CreateProductRequest;
 import dp.ms.productservice.model.Product;
 import org.mapstruct.Mapper;
 
@@ -9,5 +9,5 @@ import org.mapstruct.Mapper;
 public interface ProductMapper {
     ProductDTO productToProductDTO(Product product);
 
-    Product productRequestToProduct(ProductRequest productRequest);
+    Product productRequestToProduct(CreateProductRequest createProductRequest);
 }

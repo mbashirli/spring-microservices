@@ -1,8 +1,9 @@
 package dp.ms.productservice.service;
 
 import dp.ms.productservice.client.InventoryClient;
+import dp.ms.productservice.dto.CreateProductRequest;
 import dp.ms.productservice.dto.ProductDTO;
-import dp.ms.productservice.dto.ProductRequest;
+import dp.ms.productservice.exception.FieldAccessException;
 import dp.ms.productservice.exception.ProductCreationException;
 import dp.ms.productservice.exception.ProductNotFoundException;
 import dp.ms.productservice.mappers.ProductMapper;
@@ -12,7 +13,12 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+import java.lang.reflect.Field;
+import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.atomic.AtomicReference;
 
 @Service
@@ -22,9 +28,9 @@ public class ProductService {
     private final ProductMapper productMapper;
     private final InventoryClient inventoryClient;
     private final ProductRepository productRepository;
-    public ProductDTO createProduct(ProductRequest productRequest, Integer stockQuantity) {
+    public ProductDTO createProduct(CreateProductRequest createProductRequest, Integer stockQuantity) {
         try {
-            Product product = productMapper.productRequestToProduct(productRequest);
+            Product product = productMapper.productRequestToProduct(createProductRequest);
             Product savedProduct = productRepository.save(product);
             inventoryClient.setInventoryStock(product.getId(), stockQuantity);
             log.info("Product with id - {} is saved.", savedProduct.getId());
@@ -92,5 +98,31 @@ public class ProductService {
 
         product = productRepository.save(product);
         return productMapper.productToProductDTO(product);
+    }
+
+    public Map<String, Object> getProductFieldsById(String productId, String fields) {
+        Map<String, Object> productMap = new HashMap<>();
+
+        // Split the fields string into a List
+        List<String> fieldList = Arrays.asList(fields.split(","));
+
+        // Find the product by ID
+        Optional<Product> productOptional = productRepository.findById(productId);
+        if (productOptional.isPresent()) {
+            Product product = productOptional.get();
+
+            fieldList.forEach(field -> {
+                try {
+                    Field declaredField = Product.class.getDeclaredField(field.trim()); // Get the field in Product class
+                    declaredField.setAccessible(true); // Set accessible true to access private fields
+                    Object value = declaredField.get(product); // Get the value of the field for the product
+                    productMap.put(field, value);
+                } catch (NoSuchFieldException | IllegalAccessException e) {
+                    throw new FieldAccessException("Error accessing field: " + field, e);
+                }
+            });
+        }
+
+        return productMap;
     }
 }

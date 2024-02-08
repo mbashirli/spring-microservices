@@ -1,6 +1,6 @@
 package dp.ms.productservice.service;
 
-import dp.ms.productservice.dto.ProductRequest;
+import dp.ms.productservice.dto.CreateProductRequest;
 import dp.ms.productservice.exception.ProductCreationException;
 import dp.ms.productservice.mappers.ProductMapper;
 import dp.ms.productservice.model.Product;
@@ -42,7 +42,7 @@ class ProductServiceTest {
         });
     }
 
-    private ProductRequest getProduct() {
-        return new ProductRequest("Sample Name", "Sample Description", "Sample category", new BigDecimal("99.99"));
+    private CreateProductRequest getProduct() {
+        return new CreateProductRequest("Sample Name", "Sample Description", "Sample category", new BigDecimal("99.99"));
     }
 }
