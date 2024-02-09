@@ -14,10 +14,8 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.List;
 import java.util.Map;
 
 @RestController
@@ -54,15 +52,22 @@ public class InventoryController {
 
     @PatchMapping("/increment/{inventoryId}")
     @Operation(description = "Increment inventory by a specific quantity.")
-    public ResponseEntity<Void> incrementItemQuantity(@PathVariable("inventoryId") String inventoryId, @RequestParam Integer quantity) {
-        inventoryService.incrementInventory(inventoryId, quantity);
+    public ResponseEntity<Void> incrementProductQuantity(@PathVariable("inventoryId") String inventoryId, @RequestParam Integer quantity) {
+        inventoryService.incrementProductQuantity(inventoryId, quantity);
+        return ResponseEntity.status(HttpStatus.OK).build();
+    }
+
+    @PostMapping("/decrement")
+    @Operation(description = "Decrement inventory for productIds")
+    public ResponseEntity<Void> decrementMultipleProductsQuantity(@RequestBody Map<String, Integer> productsWithQuantity){
+        inventoryService.decrementMultipleProductsQuantity(productsWithQuantity);
         return ResponseEntity.status(HttpStatus.OK).build();
     }
 
     @PatchMapping("/decrement/{inventoryId}")
     @Operation(description = "Decrement inventory by a specific quantity.")
-    public ResponseEntity<Void> decrementItemQuantity(@PathVariable("inventoryId") String inventoryId, @RequestParam Integer quantity) {
-        inventoryService.decrementInventory(inventoryId, quantity);
+    public ResponseEntity<Void> decrementProductQuantity(@PathVariable("inventoryId") String inventoryId, @RequestParam Integer quantity) {
+        inventoryService.decrementProductQuantity(inventoryId, quantity);
         return ResponseEntity.status(HttpStatus.OK).build();
     }
 }

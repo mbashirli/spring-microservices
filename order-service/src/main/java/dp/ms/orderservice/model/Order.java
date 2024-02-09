@@ -6,12 +6,10 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EntityListeners;
 import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
+import jakarta.persistence.Version;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -19,7 +17,6 @@ import lombok.Setter;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.annotations.UpdateTimestamp;
-import org.springframework.data.annotation.Version;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.math.BigDecimal;
@@ -38,7 +35,7 @@ public class Order {
     @Id
     @GeneratedValue(generator = "UUID")
     @GenericGenerator(name = "UUID", strategy = "org.hibernate.id.UUIDGenerator")
-    @Column(name = "order_id", length = 36, columnDefinition = "varchar(36)", updatable = false, nullable = false)
+    @Column(updatable = false, nullable = false)
     private UUID id;
 
     private UUID customerId;
@@ -50,13 +47,10 @@ public class Order {
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<OrderLineItem> orderLineItems;
 
-
-    // todo : CreationTimeStamp returning null
     @CreationTimestamp
     @Column(updatable = false)
     private LocalDateTime orderDate;
 
-    // todo: UpdateTimeStamp returning null
     @UpdateTimestamp
     private LocalDateTime lastModified;
 
