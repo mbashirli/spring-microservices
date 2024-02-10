@@ -1,0 +1,32 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mongo-product
+spec:
+  selector:
+    matchLabels:
+      app: mongo-product
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        app: mongo-product
+    spec:
+      containers:
+        - name: mongo
+          image: mongo:latest
+          ports:
+            - containerPort: 27017
+          volumeMounts:
+            - name: mongo-data
+              mountPath: /data/db
+            - name: mongo-config
+              mountPath: /data/configdb
+      volumes:
+        - name: mongo-data
+          persistentVolumeClaim:
+            claimName: mongodb-data-pvc
+        - name: mongo-config
+          persistentVolumeClaim:
+            claimName: mongodb-config-pvc

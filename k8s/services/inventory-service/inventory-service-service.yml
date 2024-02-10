@@ -1,0 +1,17 @@
+apiVersion: v1
+kind: Service
+metadata:
+  creationTimestamp: null
+  labels:
+    app: inventory-service
+  name: inventory-service
+spec:
+  ports:
+  - name: 80-9193
+    port: 80
+    targetPort: 9193
+  selector:
+    app: inventory-service
+  type: ClusterIP
+status:
+  loadBalancer: {}

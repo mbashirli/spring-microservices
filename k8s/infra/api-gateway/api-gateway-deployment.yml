@@ -1,0 +1,30 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  creationTimestamp: null
+  labels:
+    app: api-gateway
+  name: api-gateway
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: api-gateway
+  strategy: {}
+  template:
+    metadata:
+      creationTimestamp: null
+      labels:
+        app: api-gateway
+    spec:
+      containers:
+      - image: mbashirli/gateway:latest
+        name: gateway
+        resources: {}
+        env:
+          - name: SPRING_PROFILES_ACTIVE
+            value: docker
+          - name: EUREKA_INSTANCE_PREFER_IP_ADDRESS
+            value: "true"
+
+status: {}

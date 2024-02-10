@@ -1,0 +1,27 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  creationTimestamp: null
+  labels:
+    app: discovery-server
+  name: discovery-server
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: discovery-server
+  strategy: {}
+  template:
+    metadata:
+      creationTimestamp: null
+      labels:
+        app: discovery-server
+    spec:
+      containers:
+      - image: mbashirli/discovery-server:latest
+        name: discovery-server
+        resources: {}
+        env:
+          - name: SPRING_PROFILES_ACTIVE
+            value: docker
+status: {}
