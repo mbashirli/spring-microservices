@@ -1,0 +1,29 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  creationTimestamp: null
+  labels:
+    app: product-service
+  name: product-service
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: product-service
+  strategy: {}
+  template:
+    metadata:
+      creationTimestamp: null
+      labels:
+        app: product-service
+    spec:
+      containers:
+      - image: mbashirli/product-service:latest
+        name: product-service
+        resources: {}
+        env:
+         - name: SPRING_PROFILES_ACTIVE
+           value: docker
+         - name: EUREKA_INSTANCE_PREFER_IP_ADDRESS
+           value: "true"
+status: {}

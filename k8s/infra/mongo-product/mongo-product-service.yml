@@ -1,0 +1,18 @@
+apiVersion: v1
+kind: Service
+metadata:
+  creationTimestamp: null
+  labels:
+    app: mongo-product
+  name: mongo-product
+spec:
+  ports:
+  - name: 27017-27017
+    port: 27017
+    protocol: TCP
+    targetPort: 27017
+  selector:
+    app: mongo-product
+  type: ClusterIP
+status:
+  loadBalancer: {}
