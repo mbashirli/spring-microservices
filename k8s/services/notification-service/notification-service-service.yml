@@ -7,10 +7,10 @@ metadata:
   name: notification-service
 spec:
   ports:
-  - name: 80-9091
+  - name: 80-8080
     port: 80
     protocol: TCP
-    targetPort: 9091
+    targetPort: 8080
   selector:
     app: notification-service
   type: ClusterIP

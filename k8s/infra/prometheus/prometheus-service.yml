@@ -3,16 +3,16 @@ kind: Service
 metadata:
   creationTimestamp: null
   labels:
-    app: order-service
-  name: order-service
+    app: prometheus
+  name: prometheus
 spec:
   ports:
-  - name: 80-8080
-    port: 80
+  - name: 9090-9090
+    port: 9090
     protocol: TCP
-    targetPort: 8080
+    targetPort: 9090
   selector:
-    app: order-service
-  type: ClusterIP
+    app: prometheus
+  type: NodePort
 status:
   loadBalancer: {}

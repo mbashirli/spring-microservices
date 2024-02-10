@@ -7,9 +7,10 @@ metadata:
   name: inventory-service
 spec:
   ports:
-  - name: 80-9193
+  - name: 80-8080
     port: 80
-    targetPort: 9193
+    protocol: TCP
+    targetPort: 8080
   selector:
     app: inventory-service
   type: ClusterIP
