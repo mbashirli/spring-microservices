@@ -3,16 +3,16 @@ kind: Service
 metadata:
   creationTimestamp: null
   labels:
-    app: order-service
-  name: order-service
+    app: grafana
+  name: grafana
 spec:
   ports:
-  - name: 80-8080
-    port: 80
+  - name: 3000-3000
+    port: 3000
     protocol: TCP
-    targetPort: 8080
+    targetPort: 3000
   selector:
-    app: order-service
-  type: ClusterIP
+    app: grafana
+  type: NodePort
 status:
   loadBalancer: {}

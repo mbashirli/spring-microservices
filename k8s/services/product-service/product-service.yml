@@ -6,9 +6,10 @@ metadata:
   name: product-service
 spec:
   ports:
-    - name: "80"
+    - name: 80-8080
       port: 80
-      targetPort: 9194
+      protocol: TCP
+      targetPort: 8080
   selector:
     app: product-service
 status:
