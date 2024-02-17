@@ -22,7 +22,7 @@
         <module>discovery-server</module>
         <module>gateway</module>
         <module>notification-service</module>
-        <module>customer-service</module>
+        <module>authentication-service</module>
     </modules>
 
     <properties>

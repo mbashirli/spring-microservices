@@ -12,6 +12,17 @@ services:
       - '3306:3306'
     volumes:
       - ./db_volumes/mysql-order:/var/lib/mysql
+  mysql-authentication:
+    image: mysql:8.3
+    container_name: mysql-authentication
+    environment:
+      MYSQL_DATABASE: authentication
+      MYSQL_PASSWORD: password
+      MYSQL_ROOT_PASSWORD: password
+    ports:
+      - '3308:3306'
+    volumes:
+      - ./db_volumes/mysql-authentication:/var/lib/mysql
   mongo-product:
     image: mongo:latest
     container_name: mongo-product
